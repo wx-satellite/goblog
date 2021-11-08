@@ -5,8 +5,10 @@ import (
 	"fmt"
 	"github.com/go-sql-driver/mysql"
 	"html/template"
+	"log"
 	"net/http"
 	"net/url"
+	"strconv"
 	"strings"
 	"time"
 	"unicode/utf8"
@@ -73,11 +75,7 @@ func articlesStoreHandler(w http.ResponseWriter, r *http.Request) {
 		errors["body"] = "内容长度需大于或等于 10 个字节"
 	}
 
-	if len(errors) <= 0 {
-		// 没有错误
-		writeTextToResponse(w, "提交信息正确")
-		return
-	} else {
+	if len(errors) > 0 {
 		// 存在错误
 		storeUrl, _ := router.Get("articles.store").URL()
 		data := &ArticlesFormData{
@@ -91,12 +89,43 @@ func articlesStoreHandler(w http.ResponseWriter, r *http.Request) {
 			panic(err)
 		}
 		_ = tmp.Execute(w, data)
+		return
 	}
+	// 没有错误，将数据存入数据库
+	id, _ := saveArticleToDB(title, body)
+	if id <= 0 {
+		w.WriteHeader(http.StatusInternalServerError)
+		writeTextToResponse(w, "服务器内部错误")
+		return
+	}
+	writeTextToResponse(w, "成功插入，ID为："+strconv.FormatInt(id, 10))
+	return
+}
 
+func saveArticleToDB(title, body string) (lastInsertId int64, err error) {
+	stmt, err := db.Prepare("INSERT INTO articles (title, body) VALUES(?,?)")
+	if err != nil {
+		return
+	}
+	// 关闭stmt防止占用连接
+	defer func() {
+		_ = stmt.Close()
+	}()
+
+	res, err := stmt.Exec(title, body)
+	if err != nil {
+		return
+	}
+	return res.LastInsertId()
 }
 
 func writeTextToResponse(w http.ResponseWriter, text string) {
 	_, _ = fmt.Fprint(w, text)
+}
+func checkError(err error) {
+	if err != nil {
+		log.Fatal(err)
+	}
 }
 
 // 设置请求头
