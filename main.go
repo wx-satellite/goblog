@@ -2,8 +2,11 @@ package main
 
 import (
 	"fmt"
+	"html/template"
 	"net/http"
+	"net/url"
 	"strings"
+	"unicode/utf8"
 
 	"github.com/gorilla/mux"
 )
@@ -35,14 +38,56 @@ func articlesIndexHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprint(w, "访问文章列表")
 }
 
+type ArticlesFormData struct {
+	Title, Body string
+	URL         *url.URL
+	Errors      map[string]string
+}
+
 func articlesStoreHandler(w http.ResponseWriter, r *http.Request) {
-	if err := r.ParseForm(); err != nil {
-		writeTextToResponse(w, "请传递正确的数据")
-		return
+	//if err := r.ParseForm(); err != nil {
+	//	writeTextToResponse(w, "请传递正确的数据")
+	//	return
+	//}
+
+	title := r.PostFormValue("title")
+	body := r.PostFormValue("body")
+
+	errors := make(map[string]string)
+
+	// 验证标题
+	if title == "" {
+		errors["title"] = "标题不能为空"
+	} else if utf8.RuneCountInString(title) < 3 || utf8.RuneCountInString(title) > 40 {
+		errors["title"] = "标题长度需介于 3-40"
 	}
 
-	writeTextToResponse(w, fmt.Sprintf("Title from Form:%s", r.Form["title"]))
-	writeTextToResponse(w, fmt.Sprintf("Title from FormValue:%s", r.FormValue("title")))
+	// 验证内容
+	if body == "" {
+		errors["body"] = "内容不能为空"
+	} else if utf8.RuneCountInString(body) < 10 {
+		errors["body"] = "内容长度需大于或等于 10 个字节"
+	}
+
+	if len(errors) <= 0 {
+		// 没有错误
+		writeTextToResponse(w, "提交信息正确")
+		return
+	} else {
+		// 存在错误
+		storeUrl, _ := router.Get("articles.store").URL()
+		data := &ArticlesFormData{
+			Title:  title,
+			Body:   body,
+			URL:    storeUrl,
+			Errors: errors,
+		}
+		tmp, err := template.ParseFiles("resources/views/articles/create.tmpl")
+		if err != nil {
+			panic(err)
+		}
+		_ = tmp.Execute(w, data)
+	}
 
 }
 
@@ -72,24 +117,19 @@ var router = mux.NewRouter()
 
 // 创建博文的表单
 func articlesCreateHandler(w http.ResponseWriter, r *http.Request) {
-	html := `
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <title>创建文章 —— 我的技术博客</title>
-</head>
-<body>
-    <form action="%s" method="post">
-        <p><input type="text" name="title"></p>
-        <p><textarea name="body" cols="30" rows="10"></textarea></p>
-        <p><button type="submit">提交</button></p>
-    </form>
-</body>
-</html>
-`
-	// 命名路由
-	storeURL, _ := router.Get("articles.store").URL()
-	fmt.Fprintf(w, html, storeURL)
+	tmp, err := template.ParseFiles("resources/views/articles/create.tmpl")
+	if err != nil {
+		panic(err)
+	}
+	storeUrl, _ := router.Get("articles.store").URL()
+	data := ArticlesFormData{
+		Title:  "",
+		Body:   "",
+		URL:    storeUrl,
+		Errors: nil,
+	}
+
+	_ = tmp.Execute(w, data)
 }
 
 func main() {
