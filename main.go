@@ -36,7 +36,18 @@ func articlesIndexHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func articlesStoreHandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprint(w, "创建新的文章")
+	if err := r.ParseForm(); err != nil {
+		writeTextToResponse(w, "请传递正确的数据")
+		return
+	}
+
+	writeTextToResponse(w, fmt.Sprintf("Title from Form:%s", r.Form["title"]))
+	writeTextToResponse(w, fmt.Sprintf("Title from FormValue:%s", r.FormValue("title")))
+
+}
+
+func writeTextToResponse(w http.ResponseWriter, text string) {
+	_, _ = fmt.Fprint(w, text)
 }
 
 // 设置请求头
