@@ -1,13 +1,17 @@
 package main
 
 import (
+	"database/sql"
 	"fmt"
+	"github.com/go-sql-driver/mysql"
 	"html/template"
 	"net/http"
 	"net/url"
 	"strings"
+	"time"
 	"unicode/utf8"
 
+	_ "github.com/go-sql-driver/mysql"
 	"github.com/gorilla/mux"
 )
 
@@ -132,8 +136,35 @@ func articlesCreateHandler(w http.ResponseWriter, r *http.Request) {
 	_ = tmp.Execute(w, data)
 }
 
-func main() {
+var db *sql.DB
 
+func initDb() (err error) {
+	config := mysql.Config{
+		User:                 "root",
+		Passwd:               "admin123",
+		Net:                  "tcp",
+		Addr:                 "127.0.0.1:3306",
+		DBName:               "goblog",
+		AllowNativePasswords: true,
+	}
+	db, err = sql.Open("mysql", config.FormatDSN())
+	if err != nil {
+		panic(err)
+		return
+	}
+	db.SetMaxIdleConns(25)
+	db.SetMaxOpenConns(25)
+	db.SetConnMaxLifetime(5 * time.Hour)
+
+	if err = db.Ping(); err != nil {
+		panic(err)
+		return
+	}
+	return
+}
+
+func main() {
+	initDb()
 	router.HandleFunc("/", homeHandler).Methods("GET").Name("home")
 	router.HandleFunc("/about", aboutHandler).Methods("GET").Name("about")
 
