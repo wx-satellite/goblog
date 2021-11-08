@@ -163,8 +163,21 @@ func initDb() (err error) {
 	return
 }
 
+func createTables() (err error) {
+	createArticlesSQL := `CREATE TABLE IF NOT EXISTS articles(
+    id bigint(20) PRIMARY KEY AUTO_INCREMENT NOT NULL,
+    title varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+    body longtext COLLATE utf8mb4_unicode_ci
+); `
+	if _, err = db.Exec(createArticlesSQL); err != nil {
+		panic(err)
+	}
+	return
+}
+
 func main() {
 	initDb()
+	createTables()
 	router.HandleFunc("/", homeHandler).Methods("GET").Name("home")
 	router.HandleFunc("/about", aboutHandler).Methods("GET").Name("about")
 
