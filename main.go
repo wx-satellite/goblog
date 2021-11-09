@@ -59,6 +59,8 @@ func articlesShowHandler(w http.ResponseWriter, r *http.Request) {
 		writeTextToResponse(w, "文章不存在")
 		return
 	}
+	// go template的自定义函数功能
+	// New的参数是模板名称，需要对应 ParseFiles() 中的文件名，否则会无法正确读取到模板，最终显示空白页面。
 	tmpl, err := template.New("show.tmpl").Funcs(template.FuncMap{
 		"RouteNameToURL": RouteNameToURL,
 		"Int64ToString":  Int64ToString,
