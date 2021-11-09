@@ -39,6 +39,12 @@ type Article struct {
 	Id          int64
 }
 
+func (a *Article) Link() string {
+	indexUrl, _ := router.Get("articles.show").URL("id", strconv.FormatInt(a.Id, 10))
+
+	return indexUrl.String()
+}
+
 func articlesShowHandler(w http.ResponseWriter, r *http.Request) {
 	id := getRouteVariable("id", r)
 
@@ -53,15 +59,60 @@ func articlesShowHandler(w http.ResponseWriter, r *http.Request) {
 		writeTextToResponse(w, "文章不存在")
 		return
 	}
-	tmpl, err := template.ParseFiles("resources/views/articles/show.tmpl")
+	tmpl, err := template.New("show.tmpl").Funcs(template.FuncMap{
+		"RouteNameToURL": RouteNameToURL,
+		"Int64ToString":  Int64ToString,
+	}).ParseFiles("resources/views/articles/show.tmpl")
+
 	if err != nil {
 		panic(err)
 	}
 	_ = tmpl.Execute(w, article)
 }
 
+func Int64ToString(ori int64) string {
+	return strconv.FormatInt(ori, 10)
+}
+func RouteNameToURL(routeName string, params ...string) string {
+	link, _ := router.Get(routeName).URL(params...)
+	return link.String()
+}
+
+func responseToInternalServerError(w http.ResponseWriter) {
+	w.WriteHeader(http.StatusInternalServerError)
+	writeTextToResponse(w, "服务器内部错误")
+}
 func articlesIndexHandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprint(w, "访问文章列表")
+	rows, err := db.Query("SELECT * FROM articles")
+	if err != nil {
+		responseToInternalServerError(w)
+		return
+	}
+	defer func() {
+		_ = rows.Close()
+	}()
+	articles := make([]Article, 0, 10)
+	for rows.Next() {
+		article := Article{}
+		err = rows.Scan(&article.Id, &article.Title, &article.Body)
+		if err != nil {
+			responseToInternalServerError(w)
+			return
+		}
+		articles = append(articles, article)
+	}
+	if err = rows.Err(); err != nil {
+		responseToInternalServerError(w)
+		return
+	}
+
+	// 加载模版
+	tmpl, err := template.ParseFiles("resources/views/articles/index.tmpl")
+	if err != nil {
+		panic(err)
+	}
+	// 4. 渲染模板，将所有文章的数据传输进去
+	_ = tmpl.Execute(w, articles)
 }
 
 type ArticlesFormData struct {
@@ -334,6 +385,31 @@ func articlesUpdateHandler(w http.ResponseWriter, r *http.Request) {
 	return
 }
 
+func articlesDeleteHandler(w http.ResponseWriter, r *http.Request) {
+	id := getRouteVariable("id", r)
+	article, err := getArticleById(id)
+	if err != nil {
+		responseToInternalServerError(w)
+		return
+	}
+	if article.Id <= 0 {
+		w.WriteHeader(http.StatusNotFound)
+		writeTextToResponse(w, "文章不存在")
+		return
+	}
+
+	// 上面查询过文章，因此这个sql只要保证不错误就一定可以正确删除文章
+	_, err = db.Exec("DELETE FROM articles WHERE id = ?", strconv.FormatInt(article.Id, 10))
+	if err != nil {
+		responseToInternalServerError(w)
+		return
+	}
+
+	indexUrl, _ := router.Get("articles.index").URL()
+	http.Redirect(w, r, indexUrl.String(), http.StatusFound)
+	return
+}
+
 func main() {
 	initDb()
 	createTables()
@@ -346,6 +422,7 @@ func main() {
 	router.HandleFunc("/articles", articlesIndexHandler).Methods("GET").Name("articles.index")
 	router.HandleFunc("/articles", articlesStoreHandler).Methods("POST").Name("articles.store")
 	router.HandleFunc("/articles/create", articlesCreateHandler).Methods("GET").Name("articles.create")
+	router.HandleFunc("/articles/{id:[0-9]+}/delete", articlesDeleteHandler).Methods("POST").Name("articles.delete")
 	// 自定义 404 页面
 	router.NotFoundHandler = http.HandlerFunc(notFoundHandler)
 
