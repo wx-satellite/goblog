@@ -34,10 +34,35 @@ func notFoundHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprint(w, "<h1>请求页面未找到 :(</h1><p>如有疑惑，请联系我们。</p>")
 }
 
+type Article struct {
+	Title, Body string
+	Id          int64
+}
+
 func articlesShowHandler(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id := vars["id"]
-	fmt.Fprint(w, "文章 ID："+id)
+
+	article := Article{}
+	// Scan 的参数必须是指针类型
+	err := db.QueryRow("SELECT * FROM articles WHERE id = ?", id).Scan(&article.Id, &article.Title, &article.Body)
+
+	if err != nil {
+		// 错误检查的时候需要区分：是未找到数据报错还是sql语句报错
+		if err == sql.ErrNoRows {
+			w.WriteHeader(http.StatusNotFound)
+			writeTextToResponse(w, "文章不存在")
+		} else {
+			w.WriteHeader(http.StatusInternalServerError)
+			writeTextToResponse(w, "服务器内部错误")
+		}
+		return
+	}
+	tmpl, err := template.ParseFiles("resources/views/articles/show.tmpl")
+	if err != nil {
+		panic(err)
+	}
+	_ = tmpl.Execute(w, article)
 }
 
 func articlesIndexHandler(w http.ResponseWriter, r *http.Request) {
@@ -92,7 +117,7 @@ func articlesStoreHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	// 没有错误，将数据存入数据库
-	id, _ := saveArticleToDB(title, body)
+	id, _ := saveArticleToDBMethodTwo(title, body)
 	if id <= 0 {
 		w.WriteHeader(http.StatusInternalServerError)
 		writeTextToResponse(w, "服务器内部错误")
@@ -100,6 +125,13 @@ func articlesStoreHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	writeTextToResponse(w, "成功插入，ID为："+strconv.FormatInt(id, 10))
 	return
+}
+func saveArticleToDBMethodTwo(title, body string) (lastInsertId int64, err error) {
+	res, err := db.Exec("INSERT INTO articles (title, body) VALUES(?,?)", title, body)
+	if err != nil {
+		return
+	}
+	return res.LastInsertId()
 }
 
 func saveArticleToDB(title, body string) (lastInsertId int64, err error) {
