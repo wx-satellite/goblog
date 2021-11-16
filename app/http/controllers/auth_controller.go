@@ -31,8 +31,8 @@ func (c *AuthController) DoRegister(w http.ResponseWriter, r *http.Request) {
 	// 	3. 验证不通过，重新展示创建表单，并提示错误
 	userObj := user.User{
 		Name:            r.PostFormValue("name"),
-		Password:        r.PostFormValue("email"),
-		Email:           r.PostFormValue("password"),
+		Email:           r.PostFormValue("email"),
+		Password:        r.PostFormValue("password"),
 		PasswordConfirm: r.PostFormValue("password_confirm"),
 	}
 	errs := requests.ValidateRegistrationForm(userObj)
