@@ -8,6 +8,10 @@ import (
 	"strings"
 )
 
+// 表单验证：
+//	比较知名的有 asaskevich/govalidator 和 thedevsaddam/govalidator ，两个都值得使用
+//	后者借鉴了 Laravel，比较简单易用，本项目将采用此包。
+
 // 验证的标签名称
 var ValidatorFlag = "valid"
 
