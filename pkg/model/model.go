@@ -23,7 +23,7 @@ func ConnectDB() (db *gorm.DB, err error) {
 	// 默认使用的是 Warn
 	DB, err = gorm.Open(config, &gorm.Config{
 		// 日常开发，日志级别为 Warn 即可，否则命令行太多信息会反而容易让我们错过重要的信息
-		Logger: gormlogger.Default.LogMode(gormlogger.Warn),
+		Logger: gormlogger.Default.LogMode(gormlogger.Info),
 	})
 	return DB, err
 }

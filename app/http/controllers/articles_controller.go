@@ -56,12 +56,11 @@ func (c *ArticlesController) Edit(w http.ResponseWriter, r *http.Request) {
 		_, _ = fmt.Fprint(w, "文章不存在")
 		return
 	}
-	formData := ArticleFormData{
-		Title:   obj.Title,
-		Body:    obj.Body,
-		Article: obj,
-	}
-	_ = view.Render(w, formData, "articles.edit", "articles.form")
+	_ = view.Render(w, view.D{
+		"Title":   obj.Title,
+		"Body":    obj.Body,
+		"Article": obj,
+	}, "articles.edit", "articles.form")
 }
 
 func (c *ArticlesController) Update(w http.ResponseWriter, r *http.Request) {
@@ -84,13 +83,12 @@ func (c *ArticlesController) Update(w http.ResponseWriter, r *http.Request) {
 
 	// 存在错误
 	if len(errs) > 0 {
-		formData := ArticleFormData{
-			Title:   obj.Title,
-			Body:    obj.Body,
-			Article: obj,
-			Errors:  errs,
-		}
-		err = view.Render(w, formData, "articles.edit", "articles.form")
+		err = view.Render(w, view.D{
+			"Title":   obj.Title,
+			"Body":    obj.Body,
+			"Article": obj,
+			"Errors":  errs,
+		}, "articles.edit", "articles.form")
 		return
 	}
 
@@ -135,10 +133,10 @@ func (c *ArticlesController) Store(w http.ResponseWriter, r *http.Request) {
 
 	// 存在错误时，重新渲染创建表单，并把错误显示出来
 	if len(errors) > 0 {
-		_ = view.Render(w, ArticleFormData{
-			Errors: errors,
-			Title:  title,
-			Body:   body,
+		_ = view.Render(w, view.D{
+			"Errors": errors,
+			"Title":  title,
+			"Body":   body,
 		}, "articles.create", "articles.form")
 		return
 	}
@@ -165,17 +163,10 @@ func (c *ArticlesController) Store(w http.ResponseWriter, r *http.Request) {
 	return
 }
 
-// ArticleFormData 创建文章表单数据
-type ArticleFormData struct {
-	Title, Body string
-	Article     article.Article
-	Errors      map[string]string
-}
-
 // Create 文章创建页面
 func (c *ArticlesController) Create(w http.ResponseWriter, r *http.Request) {
 	// 未初始化的map，写是会报错的，读不会报错
-	_ = view.Render(w, ArticleFormData{}, "articles.create", "articles.form")
+	_ = view.Render(w, view.D{}, "articles.create", "articles.form")
 }
 
 // Index 文章列表

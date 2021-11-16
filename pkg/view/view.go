@@ -9,6 +9,13 @@ import (
 	"strings"
 )
 
+// 填充到模板的数据
+// {{ .Article.GetStringID }}
+// 第一个 . 表示这个 D 数据，即 map 数据
+// Article 表示取 map 键为 Article 的值，GetStringID 即调用这个值的 GetStringID 方法
+// 因为值是 interface，所以这个应该使用的是反射
+type D map[string]interface{}
+
 // template 推荐阅读：https://www.cnblogs.com/52php/p/6059802.html
 
 // go template 的自定义模板函数
@@ -22,12 +29,21 @@ import (
 //_ = tmpl.Execute(w, obj)
 
 var (
-	Dir          = "resources/views/"
-	TemplateName = "myapp"
+	Dir = "resources/views/"
 )
 
-// Render 渲染模板
-func Render(w io.Writer, data interface{}, names ...string) (err error) {
+// Render 渲染通用视图
+func Render(w io.Writer, data interface{}, tmpFiles ...string) (err error) {
+	return RenderTemplate(w, "myapp", data, tmpFiles...)
+}
+
+// RenderSimple 渲染简单的视图
+func RenderSimple(w io.Writer, data interface{}, tmpFiles ...string) (err error) {
+	return RenderTemplate(w, "simple", data, tmpFiles...)
+}
+
+// RenderTemplate 渲染模板
+func RenderTemplate(w io.Writer, templateName string, data interface{}, tmpFiles ...string) (err error) {
 
 	// 由于将模板划分成了几个布局文件共享，因此需要都加载这些文件
 	// Glob 匹配所有符合规则的文件，用于获取这些布局文件
@@ -37,10 +53,10 @@ func Render(w io.Writer, data interface{}, names ...string) (err error) {
 		return
 	}
 
-	for _, name := range names {
+	for _, tmpFilePath := range tmpFiles {
 		// articles.show --> articles/show
-		name = strings.Replace(name, ".", "/", -1)
-		files = append(files, Dir+name+".tmpl")
+		tmpFilePath = strings.Replace(tmpFilePath, ".", "/", -1)
+		files = append(files, Dir+tmpFilePath+".tmpl")
 	}
 
 	// 当使用了 ExecuteTemplate 时，name 值其实无所谓，go的模板会查找 ExecuteTemplate 指定的第二个参数对应的模板名称
@@ -61,6 +77,6 @@ func Render(w io.Writer, data interface{}, names ...string) (err error) {
 
 	// 中间参数 name 是最终我们想要渲染的模板名称。注意这里是模板关键词 define 定义的模板名称，不是模板文件名称
 	// 也就是说不是 app.tmpl 的 app 而是该文件内容 {{define "myapp"}} 中的 "myapp"
-	return tmpl.ExecuteTemplate(w, TemplateName, data)
+	return tmpl.ExecuteTemplate(w, templateName, data)
 
 }

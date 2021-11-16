@@ -31,6 +31,11 @@ func RegisterWebRoutes(router *mux.Router) {
 	router.HandleFunc("/articles/{id:[0-9]+}", ac.Update).Methods("POST").Name("articles.update")
 	router.HandleFunc("/articles/{id:[0-9]+}/delete", ac.Delete).Methods("POST").Name("articles.delete")
 
+	// 用户认证
+	auc := new(controllers.AuthController)
+	router.HandleFunc("/auth/register", auc.Register).Methods("GET").Name("auth.register")
+	router.HandleFunc("/auth/do-register", auc.DoRegister).Methods("POST").Name("auth.doregister")
+
 	// 静态资源库
 	router.PathPrefix("/css/").Handler(http.FileServer(http.Dir("./public")))
 	router.PathPrefix("/js/").Handler(http.FileServer(http.Dir("./public")))
