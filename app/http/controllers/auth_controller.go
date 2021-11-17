@@ -12,6 +12,12 @@ import (
 type AuthController struct {
 }
 
+// Logout 退出登陆
+func (c *AuthController) Logout(w http.ResponseWriter, r *http.Request) {
+	auth.Logout()
+	http.Redirect(w, r, "/", http.StatusFound)
+}
+
 // Login 登陆页面渲染
 func (c *AuthController) Login(w http.ResponseWriter, r *http.Request) {
 	_ = view.RenderSimple(w, view.D{}, "auth.login")

@@ -42,6 +42,7 @@ func RegisterWebRoutes(router *mux.Router) {
 	router.HandleFunc("/auth/login", auc.Login).Methods("GET").Name("auth.login")
 	// 路由设置成 dologin 也是可以的
 	router.HandleFunc("/auth/do-login", auc.DoLogin).Methods("POST").Name("auth.dologin")
+	router.HandleFunc("/auth/logout", auc.Logout).Methods("POST").Name("auth.logout")
 
 	// 静态资源库
 	router.PathPrefix("/css/").Handler(http.FileServer(http.Dir("./public")))
