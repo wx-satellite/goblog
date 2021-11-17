@@ -80,6 +80,8 @@ func (c *AuthController) DoRegister(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// 注册成功，自动登陆
+	auth.Login(userObj)
 	http.Redirect(w, r, "/", http.StatusFound)
 	return
 }

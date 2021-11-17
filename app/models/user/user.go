@@ -3,6 +3,7 @@ package user
 import (
 	"goblog/app/models"
 	"goblog/pkg/model"
+	"goblog/pkg/password"
 	"gorm.io/gorm"
 )
 
@@ -11,7 +12,7 @@ type User struct {
 	// GORM 默认会将键小写化作为字段名称，并且默认是允许 NULL 的
 	Name     string `gorm:"type:varchar(50);not null;default:'';unique" valid:"name"`
 	Email    string `gorm:"type:varchar(50);default:'';not null;unique;" valid:"email"`
-	Password string `gorm:"type:char(32);default:'';not null" valid:"password"`
+	Password string `gorm:"type:char(60);default:'';not null" valid:"password"`
 
 	// gorm:"-"  设置 GORM 在读写时略过此字段
 	PasswordConfirm string ` gorm:"-" valid:"password_confirm"`
@@ -42,6 +43,6 @@ func (m *User) GetByEmail(email string) (obj User, err error) {
 }
 
 // ComparePassword 比较密码，相等返回true
-func (m *User) ComparePassword(password string) bool {
-	return m.Password == password
+func (m *User) ComparePassword(pwd string) bool {
+	return password.CheckHash(pwd, m.Password)
 }
