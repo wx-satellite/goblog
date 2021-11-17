@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"goblog/app/models/user"
 	"goblog/app/requests"
+	"goblog/pkg/auth"
 	"goblog/pkg/view"
 	"net/http"
 )
@@ -11,16 +12,32 @@ import (
 type AuthController struct {
 }
 
+// Login 登陆页面渲染
+func (c *AuthController) Login(w http.ResponseWriter, r *http.Request) {
+	_ = view.RenderSimple(w, view.D{}, "auth.login")
+}
+
+// DoLogin 处理登陆逻辑
+func (c *AuthController) DoLogin(w http.ResponseWriter, r *http.Request) {
+	email := r.PostFormValue("email")
+	password := r.PostFormValue("password")
+
+	if err := auth.Attempt(email, password); err != nil {
+		_ = view.RenderSimple(w, view.D{
+			"Email":    email,
+			"Password": password,
+			"Error":    err,
+		}, "auth.login")
+		return
+	}
+
+	// 登陆成功
+	http.Redirect(w, r, "/", http.StatusFound)
+}
+
 // Register 注册页面渲染
 func (c *AuthController) Register(w http.ResponseWriter, r *http.Request) {
 	_ = view.RenderSimple(w, view.D{}, "auth.register")
-}
-
-type userForm struct {
-	Name            string `valid:"name"`
-	Password        string `valid:"password"`
-	Email           string `valid:"email"`
-	PasswordConfirm string `valid:"password_confirm"` // 确认密码
 }
 
 // DoRegister 处理注册逻辑
@@ -37,7 +54,6 @@ func (c *AuthController) DoRegister(w http.ResponseWriter, r *http.Request) {
 	}
 	errs := requests.ValidateRegistrationForm(userObj)
 	if len(errs) > 0 {
-		// 4.1 有错误发生，打印数据
 		_ = view.RenderSimple(w, view.D{
 			"User":   userObj,
 			"Errors": errs,

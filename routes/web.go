@@ -3,6 +3,7 @@ package routes
 import (
 	"github.com/gorilla/mux"
 	"goblog/app/http/controllers"
+	"goblog/app/middlewares"
 	"net/http"
 )
 
@@ -14,6 +15,9 @@ func RegisterWebRoutes(router *mux.Router) {
 
 	// template.Execute 在渲染模版的时候会正确设置 content-type
 	// http.FileServer 文件目录处理器也会根据文件后缀设置正确的 content-type
+
+	// 全局中间
+	router.Use(middlewares.StartSession)
 
 	// 静态页面处理
 	pc := new(controllers.PagesController)
@@ -35,6 +39,9 @@ func RegisterWebRoutes(router *mux.Router) {
 	auc := new(controllers.AuthController)
 	router.HandleFunc("/auth/register", auc.Register).Methods("GET").Name("auth.register")
 	router.HandleFunc("/auth/do-register", auc.DoRegister).Methods("POST").Name("auth.doregister")
+	router.HandleFunc("/auth/login", auc.Login).Methods("GET").Name("auth.login")
+	// 路由设置成 dologin 也是可以的
+	router.HandleFunc("/auth/do-login", auc.DoLogin).Methods("POST").Name("auth.dologin")
 
 	// 静态资源库
 	router.PathPrefix("/css/").Handler(http.FileServer(http.Dir("./public")))

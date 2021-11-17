@@ -3,6 +3,7 @@ package user
 import (
 	"goblog/app/models"
 	"goblog/pkg/model"
+	"gorm.io/gorm"
 )
 
 type User struct {
@@ -18,4 +19,29 @@ type User struct {
 
 func (m *User) Create() (err error) {
 	return model.DB.Create(m).Error
+}
+
+// Get 根据用户ID获取对象
+func (m *User) Get(id uint64) (obj User, err error) {
+	err = model.DB.Where("id = ?", id).First(&obj).Error
+	if err != nil && err != gorm.ErrRecordNotFound {
+		return
+	}
+	err = nil
+	return
+}
+
+// GetByEmail 根据邮箱获取对象
+func (m *User) GetByEmail(email string) (obj User, err error) {
+	err = model.DB.Where("email = ?", email).First(&obj).Error
+	if err != nil && err != gorm.ErrRecordNotFound {
+		return
+	}
+	err = nil
+	return
+}
+
+// ComparePassword 比较密码，相等返回true
+func (m *User) ComparePassword(password string) bool {
+	return m.Password == password
 }
