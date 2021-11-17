@@ -1,6 +1,7 @@
 package view
 
 import (
+	"goblog/pkg/auth"
 	"goblog/pkg/logger"
 	"goblog/pkg/route"
 	"html/template"
@@ -33,17 +34,21 @@ var (
 )
 
 // Render 渲染通用视图
-func Render(w io.Writer, data interface{}, tmpFiles ...string) (err error) {
+func Render(w io.Writer, data D, tmpFiles ...string) (err error) {
 	return RenderTemplate(w, "myapp", data, tmpFiles...)
 }
 
 // RenderSimple 渲染简单的视图
-func RenderSimple(w io.Writer, data interface{}, tmpFiles ...string) (err error) {
+func RenderSimple(w io.Writer, data D, tmpFiles ...string) (err error) {
 	return RenderTemplate(w, "simple", data, tmpFiles...)
 }
 
 // RenderTemplate 渲染模板
-func RenderTemplate(w io.Writer, templateName string, data interface{}, tmpFiles ...string) (err error) {
+func RenderTemplate(w io.Writer, templateName string, data D, tmpFiles ...string) (err error) {
+
+	// 在所有模版中加入 isLogin 和 loginUser 变量
+	data["isLogin"] = auth.Check()
+	data["loginUser"] = auth.User()
 
 	// 由于将模板划分成了几个布局文件共享，因此需要都加载这些文件
 	// Glob 匹配所有符合规则的文件，用于获取这些布局文件

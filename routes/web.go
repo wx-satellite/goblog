@@ -22,11 +22,11 @@ func RegisterWebRoutes(router *mux.Router) {
 	// 静态页面处理
 	pc := new(controllers.PagesController)
 	router.NotFoundHandler = http.HandlerFunc(pc.NotFound)
-	router.HandleFunc("/", pc.Home).Methods("GET").Name("home")
 	router.HandleFunc("/about", pc.About).Methods("GET").Name("about")
 
 	// 文章相关页面
 	ac := new(controllers.ArticlesController)
+	router.HandleFunc("/", ac.Index).Methods("GET").Name("home")
 	router.HandleFunc("/articles/{id:[0-9]+}", ac.Show).Methods("GET").Name("articles.show")
 	router.HandleFunc("/articles", ac.Index).Methods("GET").Name("articles.index")
 	router.HandleFunc("/articles/create", ac.Create).Methods("GET").Name("articles.create")
