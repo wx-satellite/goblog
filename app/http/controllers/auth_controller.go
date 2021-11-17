@@ -9,6 +9,8 @@ import (
 	"net/http"
 )
 
+// TODO：验证邮箱功能、找回密码功能
+
 type AuthController struct {
 }
 
