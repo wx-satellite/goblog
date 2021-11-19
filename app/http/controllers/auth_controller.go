@@ -5,6 +5,7 @@ import (
 	"goblog/app/models/user"
 	"goblog/app/requests"
 	"goblog/pkg/auth"
+	"goblog/pkg/flash"
 	"goblog/pkg/view"
 	"net/http"
 )
@@ -16,6 +17,7 @@ type AuthController struct {
 
 // Logout 退出登陆
 func (c *AuthController) Logout(w http.ResponseWriter, r *http.Request) {
+	flash.Success("您已退出登陆")
 	auth.Logout()
 	http.Redirect(w, r, "/", http.StatusFound)
 }
@@ -38,7 +40,7 @@ func (c *AuthController) DoLogin(w http.ResponseWriter, r *http.Request) {
 		}, "auth.login")
 		return
 	}
-
+	flash.Success("欢迎回来！")
 	// 登陆成功
 	http.Redirect(w, r, "/", http.StatusFound)
 }
@@ -83,6 +85,7 @@ func (c *AuthController) DoRegister(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// 注册成功，自动登陆
+	flash.Success("恭喜您注册成功！")
 	auth.Login(userObj)
 	http.Redirect(w, r, "/", http.StatusFound)
 	return

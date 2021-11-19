@@ -2,6 +2,7 @@ package view
 
 import (
 	"goblog/pkg/auth"
+	"goblog/pkg/flash"
 	"goblog/pkg/logger"
 	"goblog/pkg/route"
 	"html/template"
@@ -49,6 +50,9 @@ func RenderTemplate(w io.Writer, templateName string, data D, tmpFiles ...string
 	// 在所有模版中加入 isLogin 和 loginUser 变量
 	data["isLogin"] = auth.Check()
 	data["loginUser"] = auth.User()
+
+	// flash 消息提醒
+	data["flash"] = flash.All()
 
 	// 由于将模板划分成了几个布局文件共享，因此需要都加载这些文件
 	// Glob 匹配所有符合规则的文件，用于获取这些布局文件
