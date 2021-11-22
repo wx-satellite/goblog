@@ -10,8 +10,8 @@ func ValidateRegistrationForm(data user.User) (errs map[string][]string) {
 	// 表单规格
 	rules := govalidator.MapData{
 		"name":             []string{"required", "alpha_num", "between:3,50", "not_exists:users,name"},
-		"email":            []string{"required", "min:4", "max:50", "email", "not_exists:users,email"},
-		"password":         []string{"required", "min:6"},
+		"email":            []string{"required", "minUTF8:4", "maxUTF8:50", "email", "not_exists:users,email"},
+		"password":         []string{"required", "minUTF8:6"},
 		"password_confirm": []string{"required"},
 	}
 
@@ -23,13 +23,13 @@ func ValidateRegistrationForm(data user.User) (errs map[string][]string) {
 		},
 		"email": []string{
 			"required:Email 为必填项",
-			"min:Email 长度需大于 4",
-			"max:Email 长度需小于 50",
+			"minUTF8:Email 长度需大于 4",
+			"maxUTF8:Email 长度需小于 50",
 			"email:Email 格式不正确，请提供有效的邮箱地址",
 		},
 		"password": []string{
 			"required:密码为必填项",
-			"min:长度需大于 6",
+			"minUTF8:长度需大于 6",
 		},
 		"password_confirm": []string{
 			"required:确认密码框为必填项",

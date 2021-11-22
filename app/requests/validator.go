@@ -43,7 +43,8 @@ func init() {
 		return
 	})
 
-	govalidator.AddCustomRule("min", func(field string, rule string, message string, value interface{}) (err error) {
+	// 自带的 min 和 max 对于中文字符是按照 3 个字节计算的
+	govalidator.AddCustomRule("minUTF8", func(field string, rule string, message string, value interface{}) (err error) {
 		splits := strings.Split(strings.TrimPrefix(rule, "min:"), ",")
 		length, _ := strconv.ParseInt(splits[0], 10, 64)
 		valStr, _ := value.(string)
@@ -53,7 +54,7 @@ func init() {
 		return
 	})
 
-	govalidator.AddCustomRule("max", func(field string, rule string, message string, value interface{}) (err error) {
+	govalidator.AddCustomRule("maxUTF8", func(field string, rule string, message string, value interface{}) (err error) {
 		splits := strings.Split(strings.TrimPrefix(rule, "max:"), ",")
 		length, _ := strconv.ParseInt(splits[0], 10, 64)
 		valStr, _ := value.(string)

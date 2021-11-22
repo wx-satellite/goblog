@@ -1,13 +1,16 @@
 package main
 
-import "testing"
+import (
+	"fmt"
+	"github.com/spf13/viper"
+	"testing"
+)
 
 func TestInt64ToString(t *testing.T) {
-	res := Int64ToString(12)
+	v := viper.New()
+	v.Set("map", map[string]interface{}{
+		"name": "age",
+	})
 
-	if res == "12" {
-		t.Logf("测试通过")
-	} else {
-		t.Error("测试失败")
-	}
+	fmt.Println(v.Get("map.name"))
 }
