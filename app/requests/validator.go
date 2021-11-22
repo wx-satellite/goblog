@@ -5,7 +5,9 @@ import (
 	"fmt"
 	"github.com/thedevsaddam/govalidator"
 	"goblog/pkg/model"
+	"strconv"
 	"strings"
+	"unicode/utf8"
 )
 
 // 表单验证：
@@ -37,6 +39,26 @@ func init() {
 			if message != "" {
 				err = errors.New(message)
 			}
+		}
+		return
+	})
+
+	govalidator.AddCustomRule("min", func(field string, rule string, message string, value interface{}) (err error) {
+		splits := strings.Split(strings.TrimPrefix(rule, "min:"), ",")
+		length, _ := strconv.ParseInt(splits[0], 10, 64)
+		valStr, _ := value.(string)
+		if int64(utf8.RuneCountInString(valStr)) < length {
+			err = errors.New(message)
+		}
+		return
+	})
+
+	govalidator.AddCustomRule("max", func(field string, rule string, message string, value interface{}) (err error) {
+		splits := strings.Split(strings.TrimPrefix(rule, "max:"), ",")
+		length, _ := strconv.ParseInt(splits[0], 10, 64)
+		valStr, _ := value.(string)
+		if int64(utf8.RuneCountInString(valStr)) > length {
+			err = errors.New(message)
 		}
 		return
 	})
