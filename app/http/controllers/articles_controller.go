@@ -3,7 +3,9 @@ package controllers
 import (
 	"fmt"
 	"goblog/app/models/article"
+	"goblog/app/policies"
 	"goblog/app/requests"
+	"goblog/pkg/flash"
 	"goblog/pkg/logger"
 	"goblog/pkg/route"
 	"goblog/pkg/types"
@@ -25,6 +27,11 @@ func (c *ArticlesController) Delete(w http.ResponseWriter, r *http.Request) {
 	if obj.ID <= 0 {
 		w.WriteHeader(http.StatusNotFound)
 		_, _ = fmt.Fprint(w, "文章不存在")
+		return
+	}
+	if !policies.CanUpdateArticle(obj) {
+		flash.Warning("您没有权限操作！")
+		http.Redirect(w, r, "/", http.StatusFound)
 		return
 	}
 
@@ -56,6 +63,11 @@ func (c *ArticlesController) Edit(w http.ResponseWriter, r *http.Request) {
 		_, _ = fmt.Fprint(w, "文章不存在")
 		return
 	}
+	if !policies.CanUpdateArticle(obj) {
+		flash.Warning("您没有权限操作！")
+		http.Redirect(w, r, "/", http.StatusFound)
+		return
+	}
 	_ = view.Render(w, view.D{
 		"Article": obj,
 	}, "articles.edit", "articles.form")
@@ -72,6 +84,11 @@ func (c *ArticlesController) Update(w http.ResponseWriter, r *http.Request) {
 	if obj.ID <= 0 {
 		w.WriteHeader(http.StatusNotFound)
 		_, _ = fmt.Fprint(w, "文章不存在")
+		return
+	}
+	if !policies.CanUpdateArticle(obj) {
+		flash.Warning("您没有权限操作！")
+		http.Redirect(w, r, "/", http.StatusFound)
 		return
 	}
 
@@ -171,8 +188,12 @@ func (c *ArticlesController) Show(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	_ = view.Render(w, view.D{
-		"Article": obj,
-	}, "articles.show", "articles._article_meta")
+	// 这里的 obj 是值类型， 不是指针类型，因此它的Link方法不能写成指针接收者
+	// 值类型实际是不能调用指针接收者方法的，为什么能调是因为go的语法糖
+	// 但是在 go 的 template 中，则没有这种语法糖，因此 Link 需要是值接收者（ 对应 obj 是值类型 ）否则模版会渲染错误
+	logger.Error(view.Render(w, view.D{
+		"Article":          obj,
+		"CanModifyArticle": policies.CanUpdateArticle(obj),
+	}, "articles.show", "articles._article_meta"))
 
 }

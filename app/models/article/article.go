@@ -5,7 +5,7 @@ import (
 	"goblog/app/models/user"
 	"goblog/pkg/model"
 	"goblog/pkg/route"
-	"strconv"
+	"goblog/pkg/types"
 )
 
 type Article struct {
@@ -17,7 +17,7 @@ type Article struct {
 }
 
 func (article Article) Link() string {
-	return route.NameToUrl("articles.show", "id", strconv.FormatUint(article.ID, 10))
+	return route.NameToUrl("articles.show", "id", types.Uint64ToString(article.ID))
 }
 
 func (article *Article) Create() (err error) {
@@ -46,6 +46,6 @@ func (article *Article) Delete() (rows int64, err error) {
 	return
 }
 
-func (article *Article) CreatedAtDate() string {
+func (article Article) CreatedAtDate() string {
 	return article.CreatedAt.Format("2006-01-02")
 }

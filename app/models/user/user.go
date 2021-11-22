@@ -29,6 +29,6 @@ func (m *User) ComparePassword(pwd string) bool {
 }
 
 // Link 方法用来生成用户链接
-func (m *User) Link() string {
+func (m User) Link() string {
 	return route.NameToUrl("users.show", "id", types.Uint64ToString(m.ID))
 }
