@@ -2,6 +2,7 @@ package article
 
 import (
 	"goblog/app/models"
+	"goblog/app/models/user"
 	"goblog/pkg/model"
 	"goblog/pkg/route"
 	"strconv"
@@ -9,8 +10,10 @@ import (
 
 type Article struct {
 	models.BaseModel
-	Title string `gorm:"column:title;varchar(50)" valid:"title"`
-	Body  string `gorm:"column:body" valid:"body"`
+	Title  string `gorm:"column:title;varchar(50)" valid:"title"`
+	Body   string `gorm:"column:body" valid:"body"`
+	UserId uint64 `gorm:"not null;index"`
+	User   user.User
 }
 
 func (article Article) Link() string {
@@ -41,4 +44,8 @@ func (article *Article) Delete() (rows int64, err error) {
 	}
 	rows = result.RowsAffected
 	return
+}
+
+func (article *Article) CreatedAtDate() string {
+	return article.CreatedAt.Format("2006-01-02")
 }

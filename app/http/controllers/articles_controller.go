@@ -151,7 +151,7 @@ func (c *ArticlesController) Index(w http.ResponseWriter, r *http.Request) {
 
 	_ = view.Render(w, view.D{
 		"Articles": articles,
-	}, "articles.index")
+	}, "articles.index", "articles._article_meta")
 
 }
 
@@ -173,6 +173,6 @@ func (c *ArticlesController) Show(w http.ResponseWriter, r *http.Request) {
 
 	_ = view.Render(w, view.D{
 		"Article": obj,
-	}, "articles.show")
+	}, "articles.show", "articles._article_meta")
 
 }

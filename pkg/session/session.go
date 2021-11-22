@@ -7,10 +7,12 @@ import (
 	"net/http"
 )
 
-var CookieKey = config.GetString("session.session_name")
-
 // Store 存储器，这里使用全cookie
-var Store = sessions.NewCookieStore([]byte(config.GetString("app.key")))
+var Store sessions.Store
+
+func Initialize() {
+	Store = sessions.NewCookieStore([]byte(config.GetString("app.key")))
+}
 
 // NewCookieStore 函数的注释表明，认证密钥推荐使用32位或者64位，但是加密密钥必须是 16、24或32字节
 // 对应 AES-128、AES-192或AES-256模式。加密密钥可以不用传递。
@@ -30,7 +32,7 @@ func StartSession(w http.ResponseWriter, r *http.Request) {
 
 	// Store.Get() 的第二个参数是 Cookie 的名称
 	// gorilla/sessions 支持多会话，本项目我们只使用单一会话即可
-	Session, err = Store.Get(r, CookieKey)
+	Session, err = Store.Get(r, config.GetString("session.session_name"))
 	logger.Error(err)
 	Request = r
 	Response = w

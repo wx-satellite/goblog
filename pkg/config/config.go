@@ -19,9 +19,14 @@ func init() {
 	Viper = viper.New()
 	// 2. 设置文件名称
 	Viper.SetConfigName(".env")
+
+	// 如果配置文件是：1.env，那么只设置Viper.SetConfigName("1")即可不需要再设置Viper.SetConfigType
+	// 因为，viper 可以根据 1.env 的后缀名 .env 自行解析
+	// 本案例中配置文件是 .env 相当于没有指定后缀，因此需要设置 SetConfigType
+
 	// 3. 配置类型，支持 "json", "toml", "yaml", "yml", "properties",
 	//             "props", "prop", "env", "dotenv"
-	//Viper.SetConfigType("env")
+	Viper.SetConfigType("env")
 
 	//viper.SetConfigName("config") // 配置文件名称(无扩展名)
 	//viper.SetConfigType("yaml") // 如果配置文件的名称中没有扩展名，则需要配置此项

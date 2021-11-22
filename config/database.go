@@ -5,7 +5,6 @@ import (
 )
 
 func init() {
-
 	config.Add("database", config.StrMap{
 		"mysql": map[string]interface{}{
 

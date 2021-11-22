@@ -44,6 +44,10 @@ func RegisterWebRoutes(router *mux.Router) {
 	router.HandleFunc("/auth/do-login", middlewares.Guest(auc.DoLogin)).Methods("POST").Name("auth.dologin")
 	router.HandleFunc("/auth/logout", middlewares.Auth(auc.Logout)).Methods("POST").Name("auth.logout")
 
+	// 用户相关
+	uc := new(controllers.UserController)
+	router.HandleFunc("/users/{id:[0-9]+}", middlewares.Auth(uc.Show)).Methods("GET").Name("users.show")
+
 	// 静态资源库
 	router.PathPrefix("/css/").Handler(http.FileServer(http.Dir("./public")))
 	router.PathPrefix("/js/").Handler(http.FileServer(http.Dir("./public")))

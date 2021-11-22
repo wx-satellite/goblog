@@ -21,14 +21,13 @@ func getUid() (uid uint64) {
 
 // User 根据用户ID获取对象
 func User() (obj user.User) {
-	obj, _ = obj.Get(getUid())
+	obj, _ = user.Get(getUid())
 	return
 }
 
 // Attempt 根据邮箱和密码登陆
 func Attempt(email string, password string) (err error) {
-	obj := user.User{}
-	obj, err = obj.GetByEmail(email)
+	obj, err := user.GetByEmail(email)
 	if err != nil {
 		return
 	}
