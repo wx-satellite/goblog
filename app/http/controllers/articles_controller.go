@@ -4,6 +4,7 @@ import (
 	"goblog/app/models/article"
 	"goblog/app/policies"
 	"goblog/app/requests"
+	"goblog/pkg/auth"
 	"goblog/pkg/logger"
 	"goblog/pkg/route"
 	"goblog/pkg/types"
@@ -112,8 +113,9 @@ func (c *ArticlesController) Update(w http.ResponseWriter, r *http.Request) {
 // Store 文章创建
 func (c *ArticlesController) Store(w http.ResponseWriter, r *http.Request) {
 	obj := article.Article{
-		Title: r.PostFormValue("title"),
-		Body:  r.PostFormValue("body"),
+		Title:  r.PostFormValue("title"),
+		Body:   r.PostFormValue("body"),
+		UserId: auth.User().ID, // 获取当前登陆的用户的ID
 	}
 	errs := requests.ValidateArticleForm(obj)
 	// 存在错误时，重新渲染创建表单，并把错误显示出来
