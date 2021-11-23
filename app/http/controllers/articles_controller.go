@@ -1,11 +1,9 @@
 package controllers
 
 import (
-	"fmt"
 	"goblog/app/models/article"
 	"goblog/app/policies"
 	"goblog/app/requests"
-	"goblog/pkg/flash"
 	"goblog/pkg/logger"
 	"goblog/pkg/route"
 	"goblog/pkg/types"
@@ -14,32 +12,32 @@ import (
 )
 
 type ArticlesController struct {
+	BaseController
 }
 
 func (c *ArticlesController) Delete(w http.ResponseWriter, r *http.Request) {
 	id := route.GetRouteVariable("id", r)
 	obj, err := article.Find(id)
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		_, _ = fmt.Fprint(w, "服务器内部错误")
+		c.ResponseError(w, ErrorMessage{HttpCode: http.StatusInternalServerError})
 		return
 	}
 	if obj.ID <= 0 {
-		w.WriteHeader(http.StatusNotFound)
-		_, _ = fmt.Fprint(w, "文章不存在")
+		c.ResponseError(w, ErrorMessage{
+			HttpCode: http.StatusNotFound,
+			Message:  "文章不存在",
+		})
 		return
 	}
 	if !policies.CanUpdateArticle(obj) {
-		flash.Warning("您没有权限操作！")
-		http.Redirect(w, r, "/", http.StatusFound)
+		c.ResponseForUnauthorized(w, r)
 		return
 	}
 
 	_, err = obj.Delete()
 
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		_, _ = fmt.Fprint(w, "服务器内部错误")
+		c.ResponseError(w, ErrorMessage{HttpCode: http.StatusInternalServerError})
 		return
 	}
 
@@ -54,18 +52,15 @@ func (c *ArticlesController) Edit(w http.ResponseWriter, r *http.Request) {
 
 	obj, err := article.Find(id)
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		_, _ = fmt.Fprint(w, "服务器内部错误")
+		c.ResponseError(w, ErrorMessage{HttpCode: http.StatusInternalServerError})
 		return
 	}
 	if obj.ID <= 0 {
-		w.WriteHeader(http.StatusNotFound)
-		_, _ = fmt.Fprint(w, "文章不存在")
+		c.ResponseError(w, ErrorMessage{HttpCode: http.StatusNotFound, Message: "文章不存在"})
 		return
 	}
 	if !policies.CanUpdateArticle(obj) {
-		flash.Warning("您没有权限操作！")
-		http.Redirect(w, r, "/", http.StatusFound)
+		c.ResponseForUnauthorized(w, r)
 		return
 	}
 	_ = view.Render(w, view.D{
@@ -77,18 +72,15 @@ func (c *ArticlesController) Update(w http.ResponseWriter, r *http.Request) {
 	id := route.GetRouteVariable("id", r)
 	obj, err := article.Find(id)
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		_, _ = fmt.Fprint(w, "服务器内部错误")
+		c.ResponseError(w, ErrorMessage{HttpCode: http.StatusInternalServerError})
 		return
 	}
 	if obj.ID <= 0 {
-		w.WriteHeader(http.StatusNotFound)
-		_, _ = fmt.Fprint(w, "文章不存在")
+		c.ResponseError(w, ErrorMessage{HttpCode: http.StatusNotFound, Message: "文章不存在"})
 		return
 	}
 	if !policies.CanUpdateArticle(obj) {
-		flash.Warning("您没有权限操作！")
-		http.Redirect(w, r, "/", http.StatusFound)
+		c.ResponseForUnauthorized(w, r)
 		return
 	}
 
@@ -109,8 +101,7 @@ func (c *ArticlesController) Update(w http.ResponseWriter, r *http.Request) {
 
 	_, err = obj.Update()
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		_, _ = fmt.Fprint(w, "服务器内部错误")
+		c.ResponseError(w, ErrorMessage{HttpCode: http.StatusInternalServerError})
 		return
 	}
 	showUrl := route.NameToUrl("articles.show", "id", types.Uint64ToString(obj.ID))
@@ -140,8 +131,7 @@ func (c *ArticlesController) Store(w http.ResponseWriter, r *http.Request) {
 	logger.Error(err)
 
 	if obj.ID <= 0 {
-		w.WriteHeader(http.StatusInternalServerError)
-		_, _ = fmt.Fprint(w, "服务器内部错误")
+		c.ResponseError(w, ErrorMessage{HttpCode: http.StatusInternalServerError})
 		return
 	}
 
@@ -161,8 +151,7 @@ func (c *ArticlesController) Create(w http.ResponseWriter, r *http.Request) {
 func (c *ArticlesController) Index(w http.ResponseWriter, r *http.Request) {
 	articles, err := article.GetAll()
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		_, _ = fmt.Fprint(w, "服务器内部错误")
+		c.ResponseError(w, ErrorMessage{HttpCode: http.StatusInternalServerError})
 		return
 	}
 
@@ -178,13 +167,11 @@ func (c *ArticlesController) Show(w http.ResponseWriter, r *http.Request) {
 
 	obj, err := article.Find(id)
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		_, _ = fmt.Fprint(w, "服务器内部错误")
+		c.ResponseError(w, ErrorMessage{HttpCode: http.StatusInternalServerError})
 		return
 	}
 	if obj.ID <= 0 {
-		w.WriteHeader(http.StatusNotFound)
-		_, _ = fmt.Fprint(w, "文章不存在")
+		c.ResponseError(w, ErrorMessage{HttpCode: http.StatusNotFound, Message: "文章不存在"})
 		return
 	}
 

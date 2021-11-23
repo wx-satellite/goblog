@@ -46,7 +46,7 @@ func RegisterWebRoutes(router *mux.Router) {
 
 	// 用户相关
 	uc := new(controllers.UserController)
-	router.HandleFunc("/users/{id:[0-9]+}", middlewares.Auth(uc.Show)).Methods("GET").Name("users.show")
+	router.HandleFunc("/users/{id:[0-9]+}", uc.Show).Methods("GET").Name("users.show")
 
 	// 静态资源库
 	router.PathPrefix("/css/").Handler(http.FileServer(http.Dir("./public")))

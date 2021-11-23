@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"fmt"
 	"goblog/app/models/user"
 	"goblog/app/requests"
 	"goblog/pkg/auth"
@@ -13,6 +12,7 @@ import (
 // TODO：验证邮箱功能、找回密码功能
 
 type AuthController struct {
+	BaseController
 }
 
 // Logout 退出登陆
@@ -73,14 +73,12 @@ func (c *AuthController) DoRegister(w http.ResponseWriter, r *http.Request) {
 
 	err := userObj.Create()
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		_, _ = fmt.Fprint(w, "服务器内部错误")
+		c.ResponseError(w, ErrorMessage{HttpCode: http.StatusInternalServerError})
 		return
 	}
 
 	if userObj.ID <= 0 {
-		w.WriteHeader(http.StatusInternalServerError)
-		_, _ = fmt.Fprint(w, "注册失败，请联系管理员：1453085314@qq.com")
+		c.ResponseError(w, ErrorMessage{HttpCode: http.StatusInternalServerError, Message: "注册失败，请联系管理员：1453085314@qq.com"})
 		return
 	}
 
