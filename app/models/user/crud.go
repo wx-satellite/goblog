@@ -24,3 +24,9 @@ func GetByEmail(email string) (obj User, err error) {
 	err = nil
 	return
 }
+
+// GetAll 获取所有的用户数据
+func GetAll() (objs []User, err error) {
+	err = model.DB.Find(&objs).Error
+	return
+}
