@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"github.com/thedevsaddam/govalidator"
 	"goblog/pkg/model"
-	"strconv"
+	"goblog/pkg/types"
 	"strings"
 	"unicode/utf8"
 )
@@ -45,20 +45,24 @@ func init() {
 
 	// 自带的 min 和 max 对于中文字符是按照 3 个字节计算的
 	govalidator.AddCustomRule("minUTF8", func(field string, rule string, message string, value interface{}) (err error) {
-		splits := strings.Split(strings.TrimPrefix(rule, "min:"), ",")
-		length, _ := strconv.ParseInt(splits[0], 10, 64)
+		length := types.StringToInt(strings.TrimPrefix(rule, "minUTF8:"))
 		valStr, _ := value.(string)
-		if int64(utf8.RuneCountInString(valStr)) < length {
+		if utf8.RuneCountInString(valStr) < length {
+			if message == "" {
+				message = fmt.Sprintf("长度至少为%d", length)
+			}
 			err = errors.New(message)
 		}
 		return
 	})
 
 	govalidator.AddCustomRule("maxUTF8", func(field string, rule string, message string, value interface{}) (err error) {
-		splits := strings.Split(strings.TrimPrefix(rule, "max:"), ",")
-		length, _ := strconv.ParseInt(splits[0], 10, 64)
+		length := types.StringToInt(strings.TrimPrefix(rule, "maxUTF8:"))
 		valStr, _ := value.(string)
-		if int64(utf8.RuneCountInString(valStr)) > length {
+		if utf8.RuneCountInString(valStr) > length {
+			if message == "" {
+				message = fmt.Sprintf("长度不能超过%d", length)
+			}
 			err = errors.New(message)
 		}
 		return

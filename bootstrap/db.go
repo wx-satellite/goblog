@@ -2,6 +2,7 @@ package bootstrap
 
 import (
 	"goblog/app/models/article"
+	"goblog/app/models/category"
 	"goblog/app/models/user"
 	"goblog/pkg/config"
 	"goblog/pkg/logger"
@@ -48,6 +49,6 @@ func SetupDB() {
 //	varchar(100) 改成 varchar(100);unique 仍旧不会创建唯一索引
 //	只有同时将 varchar 也改了，例如 varchar(99);unique 才会创建唯一索引
 func migration(db *gorm.DB) {
-	err := db.AutoMigrate(new(article.Article), new(user.User))
+	err := db.AutoMigrate(new(article.Article), new(user.User), new(category.Category))
 	logger.Error(err)
 }
