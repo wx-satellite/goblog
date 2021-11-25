@@ -151,14 +151,15 @@ func (c *ArticlesController) Create(w http.ResponseWriter, r *http.Request) {
 
 // Index 文章列表
 func (c *ArticlesController) Index(w http.ResponseWriter, r *http.Request) {
-	articles, err := article.GetAll()
+	articles, viewData, err := article.GetAll(r, 10)
 	if err != nil {
 		c.ResponseError(w, ErrorMessage{HttpCode: http.StatusInternalServerError})
 		return
 	}
 
 	_ = view.Render(w, view.D{
-		"Articles": articles,
+		"Articles":  articles,
+		"PagerData": viewData,
 	}, "articles.index", "articles._article_meta")
 
 }

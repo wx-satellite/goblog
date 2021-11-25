@@ -18,3 +18,9 @@ func StringToUint(str string) (i uint64) {
 	}
 	return
 }
+
+// StringToInt 将 string 转成 int
+func StringToInt(str string) (i int) {
+	i, _ = strconv.Atoi(str)
+	return
+}

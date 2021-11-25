@@ -2,6 +2,7 @@ package route
 
 import (
 	"github.com/gorilla/mux"
+	"goblog/pkg/config"
 	"net/http"
 )
 
@@ -15,7 +16,7 @@ func Initialize() {
 // NameToUrl 根据路由的名称获取url
 func NameToUrl(name string, params ...string) string {
 	urlRes, _ := Router.Get(name).URL(params...)
-	return urlRes.String()
+	return config.GetString("app.url") + urlRes.String()
 }
 
 // GetRouteVariable 获取url中的路径参数
