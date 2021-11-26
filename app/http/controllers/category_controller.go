@@ -43,6 +43,6 @@ func (c *CategoryController) Store(w http.ResponseWriter, r *http.Request) {
 	return
 }
 
-func (*CategoryController) Index() {
+func (*CategoryController) Show(w http.ResponseWriter, r *http.Request) {
 
 }

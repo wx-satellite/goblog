@@ -1,6 +1,7 @@
 package view
 
 import (
+	"goblog/app/models/category"
 	"goblog/app/models/user"
 	"goblog/pkg/auth"
 	"goblog/pkg/flash"
@@ -57,6 +58,9 @@ func RenderTemplate(w io.Writer, templateName string, data D, tmpFiles ...string
 
 	// 填充用户数据到模板变量中
 	data["Users"], _ = user.GetAll()
+
+	// 填充分类数据到模板中
+	data["Categories"], _ = category.GetAll()
 
 	// 由于将模板划分成了几个布局文件共享，因此需要都加载这些文件
 	// Glob 匹配所有符合规则的文件，用于获取这些布局文件

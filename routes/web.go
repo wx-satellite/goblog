@@ -52,7 +52,7 @@ func RegisterWebRoutes(router *mux.Router) {
 	cc := new(controllers.CategoryController)
 	router.HandleFunc("/categories/create", middlewares.Auth(cc.Create)).Methods("GET").Name("categories.create")
 	router.HandleFunc("/categories", middlewares.Auth(cc.Store)).Methods("POST").Name("categories.store")
-
+	router.HandleFunc("/categories/{id:[0-9]+}", cc.Show).Methods("GET").Name("categories.show")
 	// 静态资源库
 	router.PathPrefix("/css/").Handler(http.FileServer(http.Dir("./public")))
 	router.PathPrefix("/js/").Handler(http.FileServer(http.Dir("./public")))

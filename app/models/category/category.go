@@ -3,6 +3,8 @@ package category
 import (
 	"goblog/app/models"
 	"goblog/pkg/model"
+	"goblog/pkg/route"
+	"goblog/pkg/types"
 )
 
 type Category struct {
@@ -14,4 +16,8 @@ type Category struct {
 func (m *Category) Create() (err error) {
 	err = model.DB.Create(m).Error
 	return
+}
+
+func (m Category) Link() string {
+	return route.NameToUrl("categories.show", "id", types.Uint64ToString(m.ID))
 }
