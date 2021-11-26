@@ -4,6 +4,7 @@ import (
 	"goblog/pkg/model"
 	"goblog/pkg/pagination"
 	"goblog/pkg/route"
+	"goblog/pkg/types"
 	"gorm.io/gorm"
 	"net/http"
 )
@@ -33,6 +34,21 @@ func GetAll(r *http.Request, perPage int) (objs []Article, viewData pagination.V
 	// 获取数据
 	// 因为 results 的参数是 interface 而不是 []Article ，所以需要设置 Model 为 Article{} 这样子才能找到数据表
 	err = _page.Results(&objs)
+	return
+}
+
+// GetAllByCategoryId 根据分类id获取文章列表
+func GetAllByCategoryId(cid uint64, r *http.Request, perPage int) (articles []Article, viewData pagination.ViewData, err error) {
+	// 1. 初始化分页实例
+	db := model.DB.Model(Article{}).Where("category_id = ?", cid).Order("created_at desc")
+	_pager := pagination.New(r, db, route.NameToUrl("categories.show", "id", types.Uint64ToString(cid)), perPage)
+
+	// 2. 获取视图数据
+	viewData = _pager.Paging()
+
+	// 3. 获取数据
+	err = _pager.Results(&articles)
+
 	return
 }
 

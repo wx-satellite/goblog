@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"goblog/app/models/article"
 	"goblog/app/models/category"
 	"goblog/app/requests"
 	"goblog/pkg/flash"
@@ -43,6 +44,31 @@ func (c *CategoryController) Store(w http.ResponseWriter, r *http.Request) {
 	return
 }
 
-func (*CategoryController) Show(w http.ResponseWriter, r *http.Request) {
+// Show 根据分类展示文章
+func (c *CategoryController) Show(w http.ResponseWriter, r *http.Request) {
+	id := route.GetRouteVariable("id", r)
+
+	obj, err := category.Find(id)
+
+	if err != nil {
+		c.ResponseError(w, ErrorMessage{HttpCode: http.StatusInternalServerError})
+		return
+	}
+
+	if obj.ID <= 0 {
+		c.ResponseError(w, ErrorMessage{HttpCode: http.StatusNotFound, Message: "分类不存在"})
+		return
+	}
+
+	objs, pagination, err := article.GetAllByCategoryId(obj.ID, r, 15)
+	if err != nil {
+		c.ResponseError(w, ErrorMessage{HttpCode: http.StatusInternalServerError, Message: "获取文章数据失败"})
+		return
+	}
+
+	_ = view.Render(w, view.D{
+		"Articles":  objs,
+		"PagerData": pagination,
+	}, "articles.index", "articles._article_meta")
 
 }
